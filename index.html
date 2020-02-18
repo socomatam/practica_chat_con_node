@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+
+<head>
+	 <meta charset="UTF-8">
+	<title>Socket.IO chat</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			font: 13px Helvetica, Arial;
+		}
+
+		#form_chat {
+			background: #000;
+			padding: 3px;
+			position: fixed;
+			bottom: 0;
+			width: 100%;
+		}
+
+		#form_chat input {
+			border: 0;
+			padding: 10px;
+			width: 90%;
+			margin-right: .5%;
+		}
+
+		#form_chat button {
+			width: 9%;
+			background: rgb(130, 224, 255);
+			border: none;
+			padding: 10px;
+		}
+
+		#messages {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		#messages li {
+			padding: 5px 10px;
+		}
+
+		#messages li:nth-child(odd) {
+			background: #eee;
+		}
+
+		#messages {
+			margin-bottom: 40px
+		}
+
+		.panel_usuarios {
+			float: right;
+		}
+
+		.panel_escribiendo {
+			float: right;
+			background-color: green;
+			width 100px;
+			height: 100px;
+
+		}
+
+		#form_color {
+			background: ;
+			padding: 3px;
+			position: fixed;
+			bottom: 50px;
+			width: 100%;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="panel_escribiendo"></div>
+	<br>
+	<div class="panel_usuarios"></div>
+	<br>
+
+	<!-- jQuery Modal -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+
+	<div id="ex1" class="modal">
+		<form id="form_privado" action="">
+
+		<input id="m_privado" autocomplete="off" />
+		<button>Enviar</button>
+		</form>
+		<a href="#" rel="modal:close">Salir</a>
+	</div>
+	
+
+	<!-- Link to open the modal -->
+	<p>
+		<a href="#ex1" rel="modal:open">Abrir Modal</a>
+	</p>
+	
+	
+
+	<ul id="messages"></ul>
+
+	<form id="form_color" action="">
+		<label for="color">Color:</label>
+		<br>
+		<input id="color" name="color" type="color" />
+	</form>
+
+	<form id="form_chat" action="">
+
+		<input id="m" autocomplete="off" />
+		<button>Enviar</button>
+	</form>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+	<script>
+		$(document).ready(function() {
+			$(function() {
+				var nick = prompt("Escriba su nick");
+				var socket = io();
+				//
+				$('.seleccion_usuario').click(function() {
+					alert("Hola");
+					console.log("bien")
+				});
+				//temporizador que vigila si hay usuarios online
+				setInterval(function() {
+					socket.emit('usuario_activo', nick);
+					$('.panel_usuarios').empty();
+				}, 5000);
+				//envia al servidor el usuario
+				socket.emit('nuevo_usuario', nick);
+				//le dice al servidor si este cliente está escribiendo
+				$("#m").keydown(function() {
+					socket.emit('usuario_escribiendo', nick);
+				}); //fin key down
+				$("#m").keyup(function() {
+					socket.emit('usuario_noescribiendo', nick);
+				}); //fin key down
+				
+				//envía mensaje a todo los usuarios
+				$('#form_chat').submit(function(e) {
+					e.preventDefault(); // prevents page reloading
+					socket.emit('chat message', nick + ": " + $('#m').val());
+					//socket.emit('privado', nick + ": " + $('#m').val());
+					$('#m').val('');
+					return false;
+				});//fin form enviar mesajes a todos
+				
+				//envía mensaje privado
+				$('#form_privado').submit(function(e) {
+					e.preventDefault(); // prevents page reloading
+					
+					
+					
+					
+					
+					socket.emit('privado', nick + ": " + $('#m_privado').val());
+					
+					//socket.emit('privado', {} );
+					
+					
+					
+					
+					
+					$('#m_privado').val('');
+					return false;
+				});//fin form enviar mensaje privado
+				
+				socket.on('chat message', function(msg) {
+					$('#messages').append($("<li style='color:" + $('#color').val() + "'>").html(msg));
+				}); //fin chat menssage
+				socket.on('privado', function(msg) {
+					$('#messages').append($("<li style='color:" + $('#color').val() + "'>").text('privado ' + msg));
+				}); //fin chat menssage
+				//imprime un lista de usuarios en el chat. Al mismo tiempo guarda el id del usuario en la lista 
+				socket.on('usuario_activo', function(usuario) {
+					//var lista = $('<li  data-id="' + usuario.id + '"> ' + usuario.usuario + ' </li>');
+					
+					var lista = $('<li><a data-id="' + usuario.id + '" href="#ex1" rel="modal:open" >'  + usuario.usuario +'</a></li>')
+					$(lista).on('click', usuarioListado);
+					$('.panel_usuarios').append(lista);
+					
+		
+				});
+				//recoje el nombre del usuario sobre el que se clicó. También el id del usuario
+				function usuarioListado(event) {
+					var usuario = $(event.target).text();
+					var id = $(event.target).data();
+					
+					socket.emit('mensaje_privado', {
+						id: id.id,
+						usuario: usuario
+					});
+				} //
+				//socket.emit('usuario_conectado',' se ha conectado') ;
+				//emite a todos al usuario recién conectado
+				//socket.emit('usuario_conectado', 'se ha conectado'+nick );
+				socket.on('usuario_conectado', function(usuario) {
+					$('#messages').append($('<li>').text('El usuario ' + usuario + ' se ha conectado'));
+				});
+				socket.on('usuario_escribiendo', function(usuario) {
+					$('.panel_escribiendo').text('El usuario ' + usuario + ' está escribiendo');
+					$('.panel_escribiendo').css('visibility', 'visible');
+				});
+				socket.on('usuario_noescribiendo', function(usuario) {
+					setTimeout(function() {
+						$('.panel_escribiendo').css('visibility', 'hidden');
+					}, 1000);
+				}); //fin usuario escribiendo
+				//escribe en sl chat si un suario se desconectó
+				socket.on('usuario_desconectado', function(usuario) {
+					$('#messages').append($('<li>').text('El usuario ' + usuario + ' se ha desconectado'));
+				}); //fin disconnetc
+			}); //fin fuction
+		}); //fin ready
+	</script>
+</body>
+
+</html>
