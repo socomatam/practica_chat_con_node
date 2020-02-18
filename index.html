@@ -150,8 +150,17 @@
 				//envía mensaje a todo los usuarios
 				$('#form_chat').submit(function(e) {
 					e.preventDefault(); // prevents page reloading
-					socket.emit('chat message', nick + ": " + $('#m').val());
-					//socket.emit('privado', nick + ": " + $('#m').val());
+					var color =  $('#color').val();
+					var mensaje =  $('#m').val();
+					
+					//socket.emit('chat message', nick + ": " + mensaje);
+					
+					socket.emit('chat message', {
+						usuario: nick, 
+						mensaje:mensaje,
+						color:color}
+					);
+					
 					$('#m').val('');
 					return false;
 				});//fin form enviar mesajes a todos
@@ -177,7 +186,7 @@
 				});//fin form enviar mensaje privado
 				
 				socket.on('chat message', function(msg) {
-					$('#messages').append($("<li style='color:" + $('#color').val() + "'>").html(msg));
+					$('#messages').append($("<li style='color:" + msg.color + "'>").html(msg.usuario + ' : ' + msg.mensaje));
 				}); //fin chat menssage
 				socket.on('privado', function(msg) {
 					$('#messages').append($("<li style='color:" + $('#color').val() + "'>").text('privado ' + msg));
@@ -214,12 +223,14 @@
 				});
 				socket.on('usuario_noescribiendo', function(usuario) {
 					setTimeout(function() {
-						$('.panel_escribiendo').css('visibility', 'hidden');
+					$('.panel_escribiendo').css('visibility', 'hidden');
 					}, 1000);
 				}); //fin usuario escribiendo
 				//escribe en sl chat si un suario se desconectó
 				socket.on('usuario_desconectado', function(usuario) {
 					$('#messages').append($('<li>').text('El usuario ' + usuario + ' se ha desconectado'));
+					
+					
 				}); //fin disconnetc
 			}); //fin fuction
 		}); //fin ready

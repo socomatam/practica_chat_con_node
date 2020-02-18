@@ -23,7 +23,7 @@ io.on('connection', function(socket) {
 	//recibe los mensaje de los usuarios y los envía
 	socket.on('chat message', function(msg) {
 		//divide la frase resibida en el mensaje de un usuario
-		var divisiones = msg.split(" ");
+		var divisiones = msg.mensaje.split(" ");
 		
 		var mensaje = "";
 		
@@ -43,10 +43,16 @@ io.on('connection', function(socket) {
 			mensaje = mensaje + divisiones[i];
 			mensaje = mensaje + " ";
 		}//fin for
-		 console.log(mensaje);
+		 console.log(msg.color);
 		
 		
-		io.emit('chat message', mensaje);
+		//io.emit('chat message', mensaje);
+		
+		io.emit('chat message', {
+			mensaje:mensaje,
+			usuario:msg.usuario,
+			color: msg.color
+		});
 	});//fin chat mensaje
 	
 	socket.on('usuario_activo', function(usuario) {
@@ -77,7 +83,7 @@ io.on('connection', function(socket) {
 		socket.username = usuario;
 		//emite que el usuario nuevo se ha creado
 		
-		
+		//io.emit('usuario_activo', {usuario: usuario, id: socket.id});
 		io.emit('usuario_conectado', usuario);
 	});//fin nuevo usuario
 }); //fin conection
