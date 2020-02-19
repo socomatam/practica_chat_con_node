@@ -66,6 +66,10 @@
 			height: 100px;
 
 		}
+		
+		.panel_usuarios li{
+			cursor:pointer;
+		}
 
 		#form_color {
 			background: ;
@@ -78,6 +82,10 @@
 </head>
 
 <body>
+	
+	
+	
+	
 	<div class="panel_escribiendo"></div>
 	<br>
 	<div class="panel_usuarios"></div>
@@ -98,10 +106,13 @@
 	</div>
 	
 
-	<!-- Link to open the modal -->
-	<p>
-		<a href="#ex1" rel="modal:open">Abrir Modal</a>
-	</p>
+	<div class="caja">
+		<button class="btn_b_privados">
+			Borrar selección de usuario privados
+		</button>
+	</div>
+	
+	
 	
 	
 
@@ -124,25 +135,35 @@
 
 	<script>
 		$(document).ready(function() {
+
 			$(function() {
+				
+				var boton = $('<button><a href="#ex1" rel="modal:open">Enviar mensaje privado</a></button>');
+				$('.caja').append(boton);
+
 				var nick = prompt("Escriba su nick");
 				var socket = io();
 				//
 				$('.seleccion_usuario').click(function() {
 					alert("Hola");
 					console.log("bien")
-				});
+				});//
+				
 				//temporizador que vigila si hay usuarios online
 				setInterval(function() {
+					//envía el nombre de usuario de los clientes online
 					socket.emit('usuario_activo', nick);
 					$('.panel_usuarios').empty();
 				}, 5000);
+				
 				//envia al servidor el usuario
 				socket.emit('nuevo_usuario', nick);
+				
 				//le dice al servidor si este cliente está escribiendo
 				$("#m").keydown(function() {
 					socket.emit('usuario_escribiendo', nick);
 				}); //fin key down
+				
 				$("#m").keyup(function() {
 					socket.emit('usuario_noescribiendo', nick);
 				}); //fin key down
@@ -168,19 +189,9 @@
 				//envía mensaje privado
 				$('#form_privado').submit(function(e) {
 					e.preventDefault(); // prevents page reloading
-					
-					
-					
-					
-					
+	
 					socket.emit('privado', nick + ": " + $('#m_privado').val());
-					
 					//socket.emit('privado', {} );
-					
-					
-					
-					
-					
 					$('#m_privado').val('');
 					return false;
 				});//fin form enviar mensaje privado
@@ -189,19 +200,21 @@
 					$('#messages').append($("<li style='color:" + msg.color + "'>").html(msg.usuario + ' : ' + msg.mensaje));
 				}); //fin chat menssage
 				socket.on('privado', function(msg) {
-					$('#messages').append($("<li style='color:" + $('#color').val() + "'>").text('privado ' + msg));
+					$('#messages').append($("<li style='color:" + $('#color').val() + "'>").text('Esto sólo lo lee usted: ' + msg));
 				}); //fin chat menssage
+				
 				//imprime un lista de usuarios en el chat. Al mismo tiempo guarda el id del usuario en la lista 
 				socket.on('usuario_activo', function(usuario) {
 					//var lista = $('<li  data-id="' + usuario.id + '"> ' + usuario.usuario + ' </li>');
 					
-					var lista = $('<li><a data-id="' + usuario.id + '" href="#ex1" rel="modal:open" >'  + usuario.usuario +'</a></li>')
-					$(lista).on('click', usuarioListado);
-					$('.panel_usuarios').append(lista);
+					//var lista = $('<li><a data-id="' + usuario.id + '" href="#ex1" rel="modal:open" >'  + usuario.usuario +'</a></li>')
+					var lista = $('<li><a data-id="' + usuario.id + '">'  + usuario.usuario +'</a></li>')
 					
-		
+					$(lista).on('click', usuarioListado);//función programada para recibir el socked.id
+					$('.panel_usuarios').append(lista);
 				});
-				//recoje el nombre del usuario sobre el que se clicó. También el id del usuario
+		
+				//recoje el nombre del usuario sobre el que se clicó. También el socked.id
 				function usuarioListado(event) {
 					var usuario = $(event.target).text();
 					var id = $(event.target).data();
@@ -216,22 +229,29 @@
 				//socket.emit('usuario_conectado', 'se ha conectado'+nick );
 				socket.on('usuario_conectado', function(usuario) {
 					$('#messages').append($('<li>').text('El usuario ' + usuario + ' se ha conectado'));
-				});
+				});//fin usuarios creados
+				
 				socket.on('usuario_escribiendo', function(usuario) {
 					$('.panel_escribiendo').text('El usuario ' + usuario + ' está escribiendo');
 					$('.panel_escribiendo').css('visibility', 'visible');
 				});
+				
 				socket.on('usuario_noescribiendo', function(usuario) {
 					setTimeout(function() {
 					$('.panel_escribiendo').css('visibility', 'hidden');
 					}, 1000);
 				}); //fin usuario escribiendo
+				
 				//escribe en sl chat si un suario se desconectó
 				socket.on('usuario_desconectado', function(usuario) {
-					$('#messages').append($('<li>').text('El usuario ' + usuario + ' se ha desconectado'));
-					
-					
+					$('#messages').append($('<li>').text('El usuario ' + usuario + ' se ha desconectado'));	
 				}); //fin disconnetc
+				
+				//borra el array con los socket id almacenados de los usuarios
+				$('.btn_b_privados').click(function(){
+					socket.emit('borrar_seleccion_usuarios', 'borrar');
+				});//fin btn_privados
+
 			}); //fin fuction
 		}); //fin ready
 	</script>
