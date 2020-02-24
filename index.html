@@ -21,6 +21,7 @@
 			position: fixed;
 			bottom: 0;
 			width: 100%;
+		
 		}
 
 		#form_chat input {
@@ -56,14 +57,27 @@
 		}
 
 		.panel_usuarios {
-			float: right;
+			
+		}
+		
+		
+		
+		.usuario{
+			
+		}
+		
+		.panel_lateral{
+			padding:2%;
+			
 		}
 
 		.panel_escribiendo {
+			position: fixed;
 			float: right;
-			background-color: green;
-			width 100px;
-			height: 100px;
+			background-color: red;
+			color: white;
+			width 100%;
+			height: 25px;
 
 		}
 		
@@ -83,6 +97,11 @@
 			width:100%;
 		}
 		
+		.caja_mensajes ul{
+			margin-bottom:50px;
+			padding-top:100px;
+		}
+		
 		#caja_formularios{
 			background-color:red;
 		}
@@ -96,7 +115,10 @@
 
 <body>
 	<div class="caja_mensajes">
-		<h1 class="usuario"></h1>
+		<h1 class="usuario fijo"></h1>
+		<div class="espacio_vacio">
+			
+		</div>
 		<ul id="messages"></ul>
 		<div id="caja_formularios">
 			<form id="form_color" action="">
@@ -116,6 +138,7 @@
 			
 		<div class="panel_escribiendo">
 		</div>
+		<br>
 		<br>
 		<div class="panel_usuarios"></div>
 		<br>
@@ -168,14 +191,7 @@
 					alert("Hola");
 					console.log("bien")
 				});//
-				
-				//temporizador que vigila si hay usuarios online
-				//setInterval(function() {
-					//envía el nombre de usuario de los clientes online
-				//	socket.emit('usuario_activo', nick);
-				//	$('.panel_usuarios').empty();
-				//}, 5000);
-				
+
 				//envia al servidor el usuario recién entrado
 				socket.emit('nuevo_usuario', nick);
 				
@@ -234,16 +250,7 @@
 					//$('.panel_usuarios').append(lista);
 				});
 		
-				//recoje el nombre del usuario sobre el que se clicó. También el socked.id
-				function usuarioListado(event) {
-					var usuario = $(event.target).text();
-					var id = $(event.target).data();
-					alert("Hola");
-					socket.emit('mensaje_privado', {
-						id: id.id,
-						usuario: usuario
-					});
-				} //
+			
 				//socket.emit('usuario_conectado',' se ha conectado') ;
 				//emite a todos al usuario recién conectado
 				//socket.emit('usuario_conectado', 'se ha conectado'+nick );
@@ -299,6 +306,19 @@
 				});//fin btn_privados
 
 			}); //fin fuction
+			
+				//recoje el nombre del usuario sobre el que se clicó. También el socked.id
+			function usuarioListado(event) {
+				var usuario = $(event.target).text();
+				var id = $(event.target).data();
+				alert("Hola");
+				socket.emit('mensaje_privado', {
+						id: id.id,
+						usuario: usuario
+				});
+			} //fin usuario listado
+			
+			window.scrollTo(0, document.body.scrollHeight);
 		}); //fin ready
 	</script>
 </body>

@@ -21,6 +21,7 @@ io.on('connection', function(socket) {
 	
 	//recibe los mensaje de los usuarios y los envía
 	socket.on('chat message', function(msg) {
+		
 		//divide la frase recibida en el mensaje de un usuario
 		var divisiones = msg.mensaje.split(" ");
 		
