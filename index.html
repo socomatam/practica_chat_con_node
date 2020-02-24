@@ -26,7 +26,7 @@
 		#form_chat input {
 			border: 0;
 			padding: 10px;
-			width: 90%;
+			width: 89%;
 			margin-right: .5%;
 		}
 
@@ -78,71 +78,91 @@
 			bottom: 50px;
 			width: 100%;
 		}
+		
+		.caja_mensajes{
+			width:100%;
+		}
+		
+		#caja_formularios{
+			background-color:red;
+		}
+		
+		body{
+			display:flex;
+		}
+		
 	</style>
 </head>
 
 <body>
-	
-	
-	
-	
-	<div class="panel_escribiendo"></div>
-	<br>
-	<div class="panel_usuarios"></div>
-	<br>
+	<div class="caja_mensajes">
+		<h1 class="usuario"></h1>
+		<ul id="messages"></ul>
+		<div id="caja_formularios">
+			<form id="form_color" action="">
+				<label for="color">Color:</label>
+				<br>
+				<input id="color" name="color" type="color" />
+			</form>
 
-	<!-- jQuery Modal -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
-
-	<div id="ex1" class="modal">
-		<form id="form_privado" action="">
-
-		<input id="m_privado" autocomplete="off" />
-		<button>Enviar</button>
-		</form>
-		<a href="#" rel="modal:close">Salir</a>
+			<form id="form_chat" action="">
+				<input id="m" autocomplete="off" />
+				<button>Enviar</button>
+			</form>
+		</div>
 	</div>
 	
-
-	<div class="caja">
-		<button class="btn_b_privados">
-			Borrar selección de usuario privados
-		</button>
-	</div>
-	
-	
-	
-	
-
-	<ul id="messages"></ul>
-
-	<form id="form_color" action="">
-		<label for="color">Color:</label>
+	<div class="panel_lateral">
+			
+		<div class="panel_escribiendo">
+		</div>
 		<br>
-		<input id="color" name="color" type="color" />
-	</form>
+		<div class="panel_usuarios"></div>
+		<br>
 
-	<form id="form_chat" action="">
+		<!-- jQuery Modal -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
 
-		<input id="m" autocomplete="off" />
-		<button>Enviar</button>
-	</form>
+		<div id="ex1" class="modal">
+			<form id="form_privado" action="">
 
-	<script src="/socket.io/socket.io.js"></script>
-	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+			<input id="m_privado" autocomplete="off" />
+			<button>Enviar</button>
+			</form>
+			<a href="#" rel="modal:close">Salir</a>
+		</div>
 
+
+		<div class="caja">
+			<button class="btn_b_privados">
+				Borrar selección de usuario privados
+			</button>
+		</div>
+	</div>
+	
+	
+	
+
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+	
+	
 	<script>
 		$(document).ready(function() {
 
 			$(function() {
-				
+				//crea un botón
 				var boton = $('<button><a href="#ex1" rel="modal:open">Enviar mensaje privado</a></button>');
 				$('.caja').append(boton);
 
 				var nick = prompt("Escriba su nick");
 				var socket = io();
+				
+				
+				$('.usuario').text('Bienvenido '+ nick)
 				//
 				$('.seleccion_usuario').click(function() {
 					alert("Hola");
@@ -150,13 +170,13 @@
 				});//
 				
 				//temporizador que vigila si hay usuarios online
-				setInterval(function() {
+				//setInterval(function() {
 					//envía el nombre de usuario de los clientes online
-					socket.emit('usuario_activo', nick);
-					$('.panel_usuarios').empty();
-				}, 5000);
+				//	socket.emit('usuario_activo', nick);
+				//	$('.panel_usuarios').empty();
+				//}, 5000);
 				
-				//envia al servidor el usuario
+				//envia al servidor el usuario recién entrado
 				socket.emit('nuevo_usuario', nick);
 				
 				//le dice al servidor si este cliente está escribiendo
@@ -208,17 +228,17 @@
 					//var lista = $('<li  data-id="' + usuario.id + '"> ' + usuario.usuario + ' </li>');
 					
 					//var lista = $('<li><a data-id="' + usuario.id + '" href="#ex1" rel="modal:open" >'  + usuario.usuario +'</a></li>')
-					var lista = $('<li><a data-id="' + usuario.id + '">'  + usuario.usuario +'</a></li>')
+					//var lista = $('<li><a data-id="' + usuario.id + '">'  + usuario.usuario +'</a></li>')
 					
-					$(lista).on('click', usuarioListado);//función programada para recibir el socked.id
-					$('.panel_usuarios').append(lista);
+					//$(lista).on('click', usuarioListado);//función programada para recibir el socked.id
+					//$('.panel_usuarios').append(lista);
 				});
 		
 				//recoje el nombre del usuario sobre el que se clicó. También el socked.id
 				function usuarioListado(event) {
 					var usuario = $(event.target).text();
 					var id = $(event.target).data();
-					
+					alert("Hola");
 					socket.emit('mensaje_privado', {
 						id: id.id,
 						usuario: usuario
@@ -227,8 +247,22 @@
 				//socket.emit('usuario_conectado',' se ha conectado') ;
 				//emite a todos al usuario recién conectado
 				//socket.emit('usuario_conectado', 'se ha conectado'+nick );
+				
+				//escribe en el chat al usuario recién conectado
 				socket.on('usuario_conectado', function(usuario) {
-					$('#messages').append($('<li>').text('El usuario ' + usuario + ' se ha conectado'));
+					$('#messages').append($('<li>').text('El usuario ' + usuario.usuario + ' se ha conectado'));
+					
+					var usuarios = usuario.usuarios;
+					var id = usuario.id;
+					
+					$('.panel_usuarios').empty();
+					
+					for (const indice in usuarios) {
+  						var lista = $('<li><a data-id="' + id[indice] + '">'  + usuarios[indice] +'</a></li>')
+						$(lista).on('click', usuarioListado);//función programada para recibir el socked.id
+						$('.panel_usuarios').append(lista)
+					}//fin for	
+					
 				});//fin usuarios creados
 				
 				socket.on('usuario_escribiendo', function(usuario) {
@@ -244,7 +278,19 @@
 				
 				//escribe en sl chat si un suario se desconectó
 				socket.on('usuario_desconectado', function(usuario) {
-					$('#messages').append($('<li>').text('El usuario ' + usuario + ' se ha desconectado'));	
+					$('#messages').append($('<li>').text('El usuario ' + usuario.usuario + ' se ha desconectado'));	
+					
+					var usuarios = usuario.usuarios;
+					var id = usuario.id;
+					
+					$('.panel_usuarios').empty();
+					
+					for (const indice in usuarios) {
+  						var lista = $('<li><a data-id="' + id[indice] + '">'  + usuarios[indice] +'</a></li>')
+						$(lista).on('click', usuarioListado);//función programada para recibir el socked.id
+						$('.panel_usuarios').append(lista)
+					}//fin for
+					
 				}); //fin disconnetc
 				
 				//borra el array con los socket id almacenados de los usuarios

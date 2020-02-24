@@ -8,6 +8,7 @@ app.get('/', function(req, res) {
 
 var usuarios = [];
 var socketsId = [];
+var listaDeUsuarios=[];
 
 //abre conexión
 io.on('connection', function(socket) {
@@ -15,9 +16,8 @@ io.on('connection', function(socket) {
 	//recibe el nombre de usuario al que se le enviará un privado
 	//también recibe el socket.id literal 
 	socket.on('mensaje_privado', function(usuario){
-		socketsId.push(usuario.id);
+		//socketsId.push(usuario.id);
 	});//fin mensaje privado
-	
 	
 	//recibe los mensaje de los usuarios y los envía
 	socket.on('chat message', function(msg) {
@@ -59,8 +59,24 @@ io.on('connection', function(socket) {
 	});//fin disconect
 
 	socket.on('disconnect', function() {
+
+		for(var i = 0; i < listaDeUsuarios.length; i++){
+			if (listaDeUsuarios[i] == socket.username){
+				listaDeUsuarios.splice(i,1);
+				socketsId.splice(i,1);
+				console.log("ddd");
+			}//fin if
+		}//fin for
+		
+		console.log(listaDeUsuarios);
+		
 		//emite si algún usuario ha salido del chat
-		io.emit('usuario_desconectado', socket.username);
+		io.emit('usuario_desconectado', {
+			usuario:socket.username,
+			usuarios:listaDeUsuarios,
+			id:socketsId,
+		});
+	
 	});//fin disconect
 	
 	//recibe el evento del usuario escribiendo
@@ -75,10 +91,17 @@ io.on('connection', function(socket) {
 	
 	//recibe el nombre de usuario
 	socket.on('nuevo_usuario', function(usuario) {	
+		//guarda el nombre de usuario en la sección
 		socket.username = usuario;
+		listaDeUsuarios.push(usuario);
+		socketsId.push(socket.id);
 		//emite que el usuario nuevo se ha creado
-		//io.emit('usuario_activo', {usuario: usuario, id: socket.id});
-		io.emit('usuario_conectado', usuario);
+
+		io.emit('usuario_conectado', {
+			usuario:usuario,
+			usuarios:listaDeUsuarios,
+			id:socketsId,
+		});
 	});//fin nuevo usuario
 	
 	socket.on('borrar_seleccion_usuarios', function(orden){
@@ -97,7 +120,6 @@ io.on('connection', function(socket) {
 		//io.to().emit('privado', 'Este mensaje es único');
 	});//fin privado
 	
-
 }); //fin conection
 
 http.listen(80, function() {
