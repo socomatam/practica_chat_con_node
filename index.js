@@ -9,6 +9,7 @@ app.get('/', function(req, res) {
 var usuarios = [];
 var socketsId = [];
 var listaDeUsuarios=[];
+var socketsIdPrivados = [];
 
 //abre conexión
 io.on('connection', function(socket) {
@@ -16,7 +17,8 @@ io.on('connection', function(socket) {
 	//recibe el nombre de usuario al que se le enviará un privado
 	//también recibe el socket.id literal 
 	socket.on('mensaje_privado', function(usuario){
-		//socketsId.push(usuario.id);
+		socketsIdPrivados.push(usuario.id);
+		console.log(socketsIdPrivados);
 	});//fin mensaje privado
 	
 	//recibe los mensaje de los usuarios y los envía
@@ -106,16 +108,16 @@ io.on('connection', function(socket) {
 	});//fin nuevo usuario
 	
 	socket.on('borrar_seleccion_usuarios', function(orden){
-		socketsId = [];
+		socketsIdPrivados = [];
 		console.log('Id de usuarios borrador');
 	});////fin borrar
 	
 	//envía el mensaje privado
 	socket.on('privado',function(mensaje){
 
-		for(var i = 0; i < socketsId.length; i++){
+		for(var i = 0; i < socketsIdPrivados.length; i++){
 			//console.log(socketsId[i]);
-			io.to(socketsId[i]).emit('privado', mensaje);
+			io.to(socketsIdPrivados[i]).emit('privado', mensaje);
 		}//fin for
 
 		//io.to().emit('privado', 'Este mensaje es único');

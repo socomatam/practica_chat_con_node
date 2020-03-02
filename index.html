@@ -307,17 +307,21 @@
 
 			}); //fin fuction
 			
-				//recoje el nombre del usuario sobre el que se clicó. También el socked.id
+			//recoje el nombre del usuario sobre el que se clicó. También el socked.id
 			function usuarioListado(event) {
+				var socket = io();
 				var usuario = $(event.target).text();
 				var id = $(event.target).data();
-				alert("Hola");
+				
+				console.log(usuario);
+				console.log(id);
+				
 				socket.emit('mensaje_privado', {
 						id: id.id,
 						usuario: usuario
-				});
+				});//fin mensaje privado
 			} //fin usuario listado
-			
+
 			window.scrollTo(0, document.body.scrollHeight);
 		}); //fin ready
 	</script>
